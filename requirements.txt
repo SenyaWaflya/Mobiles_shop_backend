@@ -1,0 +1,6 @@
+email_validator==2.2.0
+fastapi==0.115.5
+psycopg2-binary==2.9.10
+python-dotenv==1.0.1
+SQLAlchemy==2.0.36
+uvicorn==0.32.0
