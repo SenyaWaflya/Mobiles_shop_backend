@@ -2,13 +2,14 @@
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from auth.utils.hashing_password import hash_password
 from models.models import User
 from models.schemas.user_schema import UserResponse, UserDto
 from routers.db_session import get_db
 
 
 def create_user(user: UserDto, db: Session = Depends(get_db)) -> UserResponse:
-    db_user = User(username=user.username, email=user.email)
+    db_user = User(username=user.username, email=user.email, password=hash_password(user.password))
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
