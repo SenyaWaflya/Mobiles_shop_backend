@@ -7,7 +7,7 @@ from routers.db_session import get_db
 from services.product_service import get_all_products, create, get_product_by_id, delete_product, \
     edit_quantity_of_product_by_id
 
-router = APIRouter()
+router = APIRouter(tags=['Products'])
 
 
 @router.get('/products')

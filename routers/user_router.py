@@ -6,7 +6,7 @@ from routers.db_session import get_db
 from models.schemas.user_schema import UserResponse, UserDto
 from services.user_service import create_user, delete_user, get_users, edit_user_by_id, get_user_by_id
 
-router = APIRouter()
+router = APIRouter(tags=['Users'])
 
 
 @router.get('/users')

@@ -8,7 +8,7 @@ from routers.product_router import router as product_router
 
 app = FastAPI(title='Mobiles shop')
 
-app.include_router(user_router, tags=['Users'])
-app.include_router(product_router, tags=['Products'])
+app.include_router(user_router)
+app.include_router(product_router)
 
 Base.metadata.create_all(bind=engine)
