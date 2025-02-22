@@ -1,4 +1,6 @@
 #TODO: develop service for users
+from starlette.status import HTTP_401_UNAUTHORIZED
+
 import auth.jwt_utils
 
 from fastapi import Depends, HTTPException, status
@@ -6,6 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import exists
 
 from auth.hashing_password import hash_password
+from auth.jwt_utils import get_auth_user
 from models.models import User
 from models.schemas.user_schema import UserResponse, UserDto
 from models.schemas.token_schema import TokenInfo
@@ -69,9 +72,14 @@ def get_user_by_id(id: int, db: Session = Depends(get_db)) -> UserResponse:
 def auth_user_with_jwt(email: str, password: str, db: Session = Depends(get_db)) -> TokenInfo:
     user = auth.jwt_utils.validate_auth_user(email, password, db)
     payload = {
-        'sub': user.id,
+        'sub': str(user.id),
         'username': user.username,
         'email': user.email
     }
     token = auth.jwt_utils.encode_jwt(payload=payload)
     return TokenInfo(access_token=token, token_type='Bearer')
+
+
+def get_my_info(id: int, db: Session = Depends(get_db)) -> UserResponse:
+    db_user = db.get(User, id)
+    return UserResponse.model_validate(db_user)

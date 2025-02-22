@@ -1,17 +1,30 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, Path, Form
-from fastapi.security import OAuth2AuthorizationCodeBearer
 from sqlalchemy.orm import Session
 
+from auth.jwt_utils import get_auth_user
 from routers.db_session import get_db
 from models.schemas.user_schema import UserResponse, UserDto
-from services.user_service import create_user, delete_user, get_users, edit_user_by_id, get_user_by_id, auth_user_with_jwt
+from services.user_service import (
+    create_user,
+    delete_user,
+    get_users,
+    edit_user_by_id,
+    get_user_by_id,
+    auth_user_with_jwt,
+    get_my_info
+)
 
 router = APIRouter(tags=['Users'])
 
 @router.post('/login')
 async def login(email: str = Form(), password: str = Form(), db: Session = Depends(get_db)):
     return auth_user_with_jwt(email, password, db)
+
+
+@router.get('/users/me')
+async def get_me(id: int = Depends(get_auth_user), db: Session = Depends(get_db)):
+    return get_my_info(id=id, db=db)
 
 
 @router.get('/users')

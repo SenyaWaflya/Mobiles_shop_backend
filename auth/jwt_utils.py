@@ -3,16 +3,28 @@ from sqlalchemy.orm import Session
 from config import settings
 from jwt import encode, decode
 from datetime import datetime, timedelta
-from fastapi import Form, HTTPException, Depends
+from fastapi import HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from routers.db_session import get_db
 from models.models import User
 from auth.hashing_password import validate_password
 
 
+algorithm = settings.ALGORITHM
+private_key = settings.JWT_PRIVATE.read_text()
+public_key = settings.JWT_PUBLIC.read_text()
+http_bearer = HTTPBearer()
+
+
+def get_auth_user(credentials: HTTPAuthorizationCredentials = Depends(http_bearer)):
+    token = credentials.credentials
+    payload = decode_jwt(token=token)
+    auth_user_id = payload.get('sub')
+    return auth_user_id
+
+
 def encode_jwt(
         payload: dict,
-        private_key: str = settings.JWT_PRIVATE.read_text(),
-        algorithm: str = settings.ALGORITHM,
         expire_minutes: int = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 ):
     payload_to_encode = payload.copy()
@@ -23,11 +35,7 @@ def encode_jwt(
     return encoded
 
 
-def decode_jwt(
-        token: str,
-        public_key: str = settings.JWT_PUBLIC.read_text(),
-        algorithm: str = settings.ALGORITHM
-):
+def decode_jwt(token: str):
     decoded = decode(token, public_key, algorithms=[algorithm])
     return decoded
 
