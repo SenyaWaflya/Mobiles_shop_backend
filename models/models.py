@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, String, Text, BOOLEAN
 
 from models.database import Base
 
@@ -9,6 +9,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True)
+    is_superuser = Column(BOOLEAN, default=False, nullable=False)
     password = Column(Text, nullable=False)
 
 

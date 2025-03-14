@@ -7,6 +7,7 @@ from pydantic import Field
 class UserBase(BaseModel):
     username: Annotated[str, Field(..., title='Имя пользователя', min_length=2, max_length=15)]
     email: Optional[Annotated[EmailStr, Field(title='Почта пользователя', examples=['anymail@gmail.com'])]] = None
+    is_superuser: Annotated[bool, Field(title='Права суперпользователя')] = False
     password: Annotated[str, Field(..., title='Пароль пользователя')]
 
 

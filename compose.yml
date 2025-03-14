@@ -1,0 +1,32 @@
+services:
+  db:
+    container_name:
+      shop_postgres
+    image:
+      postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${DB_USER} -d ${DB_NAME}'" ]
+      interval: 60s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  shop_backend:
+    container_name:
+      shop_backend
+    image: shop_backend
+    ports:
+      - "8000:8000"
+    build:
+      context:
+        .
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  postgres_data:

@@ -1,5 +1,6 @@
 .env
 .idea
 __pycache__
-/certs/
+certs
+!certs/.gitkeep
 **/__init__.py
