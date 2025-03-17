@@ -1,12 +1,11 @@
 from typing import Annotated
-
 from pydantic import BaseModel
 from pydantic import Field
 
 
 class ProductBase(BaseModel):
-    title: Annotated[str, Field(..., title='Название продукта')]
-    quantity: Annotated[int, Field(..., title='Количество имеющегося продукта')]
+    title: Annotated[str, Field(title='Название продукта', min_length=4, max_length=30, examples=['Iphone 16'])]
+    quantity: Annotated[int, Field(..., title='Количество имеющегося продукта', ge=0)]
 
 
 class ProductDto(ProductBase):

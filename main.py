@@ -1,9 +1,10 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from starlette.responses import RedirectResponse
 
-from models.database import engine, Base
-
-from routers.user_router import router as user_router
-from routers.product_router import router as product_router
+from src.database.database import engine, create_tables
+from src.routers.user import router as user_router
+from src.routers.product import router as product_router
 
 
 swagger_ui_parameters = {
@@ -14,9 +15,20 @@ swagger_ui_parameters = {
     }
 }
 
-app = FastAPI(title='Mobiles shop', swagger_ui_parameters=swagger_ui_parameters)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await create_tables()
+    yield
+    await engine.dispose()
+
+
+app = FastAPI(title='Mobiles shop', swagger_ui_parameters=swagger_ui_parameters, lifespan=lifespan)
 
 app.include_router(user_router)
 app.include_router(product_router)
 
-Base.metadata.create_all(bind=engine)
+
+@app.get('/')
+def to_docs():
+    return RedirectResponse('/docs')

@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 
 
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__)
 
 class Settings(BaseSettings):
     DB_USER: str
@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     DB_HOST: str
     DB_PORT: str
     DB_NAME: str
-    JWT_PRIVATE: Path = BASE_DIR / 'certs' / 'jwt-private.pem'
-    JWT_PUBLIC: Path = BASE_DIR / 'certs' / 'jwt-public.pem'
+    JWT_PRIVATE: Path = BASE_DIR / 'src' / 'certs' / 'jwt-private.pem'
+    JWT_PUBLIC: Path = BASE_DIR / 'src' / 'certs' / 'jwt-public.pem'
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     SUPERUSER_PASSWORD: str
