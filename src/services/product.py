@@ -43,17 +43,16 @@ class ProductService:
 
 
     @staticmethod
-    async def delete_product(id: int) -> ProductResponse:
+    async def delete_product(id: int) -> dict[str, str]:
         async with new_session() as session:
             query = select(Product).where(Product.id == id)
             result = await session.execute(query)
             product = result.scalars().first()
             if not product:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Product not found')
-            session.delete(product)
+            await session.delete(product)
             await session.commit()
-            await session.refresh(product)
-            return ProductResponse.model_validate(product)
+            return {"msg": "Product deleted successfully"}
 
 
     @staticmethod
