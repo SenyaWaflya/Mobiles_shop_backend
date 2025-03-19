@@ -14,8 +14,9 @@ class Settings(BaseSettings):
     JWT_PUBLIC: Path = BASE_DIR / 'src' / 'certs' / 'jwt-public.pem'
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
-    SUPERUSER_PASSWORD: str
-    SUPERUSER_EMAIL: str
+    INIT_OWNER_USERNAME: str
+    INIT_OWNER_PASSWORD: str
+    INIT_OWNER_EMAIL: str
 
     model_config = SettingsConfigDict(env_file='.env')
 

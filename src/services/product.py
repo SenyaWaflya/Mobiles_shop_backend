@@ -4,6 +4,7 @@ from sqlalchemy import select
 from src.database.database import new_session
 from src.database.models import Product
 from src.schemas.product import ProductDto, ProductResponse
+from src.auth.jwt import validate_admin_permissions
 
 
 class ProductService:
@@ -19,7 +20,8 @@ class ProductService:
 
 
     @staticmethod
-    async def create(product_dto: ProductDto) -> ProductResponse:
+    async def create(product_dto: ProductDto, token_payload: dict) -> ProductResponse:
+        validate_admin_permissions(token_payload)
         async with new_session() as session:
             product = Product(
                 title=product_dto.title,
@@ -43,7 +45,8 @@ class ProductService:
 
 
     @staticmethod
-    async def delete_product(id: int) -> dict[str, str]:
+    async def delete(id: int, token_payload: dict) -> dict[str, str]:
+        validate_admin_permissions(token_payload)
         async with new_session() as session:
             query = select(Product).where(Product.id == id)
             result = await session.execute(query)
@@ -56,7 +59,8 @@ class ProductService:
 
 
     @staticmethod
-    async def edit_quantity_of_product_by_id(id: int, new_quantity: int) -> ProductResponse:
+    async def edit_quantity_of_product_by_id(id: int, new_quantity: int, token_payload: dict) -> ProductResponse:
+        validate_admin_permissions(token_payload)
         async with new_session() as session:
             query = select(Product).where(Product.id == id)
             result = await session.execute(query)

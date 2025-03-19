@@ -1,3 +1,4 @@
+from fastapi import HTTPException, status
 from config import settings
 from jwt import encode, decode
 from datetime import datetime, timedelta
@@ -10,11 +11,24 @@ private_key = settings.JWT_PRIVATE.read_text()
 public_key = settings.JWT_PUBLIC.read_text()
 
 
-def get_auth_user(credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer())) -> int:
+def get_auth_user(credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer())) -> dict:
     token = credentials.credentials
     payload = decode_jwt(token=token)
-    auth_user_id = payload.get('sub')
-    return int(auth_user_id)
+    payload_to_response = {
+        'sub': int(payload.get('sub')),
+        'is_superuser': payload.get('is_superuser'),
+        'is_owner': payload.get('is_owner')
+    }
+    return payload_to_response
+
+
+def validate_admin_permissions(token_payload: dict) -> None:
+    if not token_payload.get('is_superuser'):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not enough permissions')
+
+def validate_owner_permissions(token_payload: dict) -> None:
+    if not token_payload.get('is_owner'):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not enough permissions')
 
 
 def encode_jwt(

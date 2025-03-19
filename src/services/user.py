@@ -5,6 +5,7 @@ from sqlalchemy.sql import exists
 
 from src.auth.hashing_password import hash_password, validate_password
 from src.auth import jwt
+from src.auth.jwt import validate_admin_permissions, validate_owner_permissions
 from src.database.database import new_session
 from src.database.models import User
 from src.schemas.user import UserResponse, UserDto
@@ -62,14 +63,17 @@ class UserService:
         payload = {
             'sub': str(user.id),
             'username': user.username,
-            'email': user.email
+            'email': user.email,
+            'is_superuser': user.is_superuser,
+            'is_owner': user.is_owner
         }
         token = jwt.encode_jwt(payload=payload)
         return TokenInfo(access_token=token, token_type='Bearer')
 
 
     @staticmethod
-    async def get_users() -> list[UserResponse]:
+    async def get_users(token_payload: dict) -> list[UserResponse]:
+        validate_admin_permissions(token_payload)
         async with new_session() as session:
             query = select(User)
             result = await session.execute(query)
@@ -80,7 +84,8 @@ class UserService:
 
 
     @staticmethod
-    async def get_user_by_id(id: int) -> UserResponse:
+    async def get_user_by_id(id: int, token_payload: dict) -> UserResponse:
+        validate_admin_permissions(token_payload)
         async with new_session() as session:
             query = select(User).where(User.id == id)
             result = await session.execute(query)
@@ -88,3 +93,50 @@ class UserService:
             if not user:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
             return UserResponse.model_validate(user)
+
+
+    @staticmethod
+    async def get_info_me(token_payload: dict) -> UserResponse:
+        id = token_payload.get('sub')
+        async with new_session() as session:
+            query = select(User).where(User.id == id)
+            result = await session.execute(query)
+            user = result.scalars().first()
+            if not user:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
+            return UserResponse.model_validate(user)
+
+
+    @staticmethod
+    async def edit_info_me(new_username: str, new_email: EmailStr, token_payload: dict) -> UserResponse:
+        id = token_payload.get('sub')
+        async with new_session() as session:
+            query = select(User).where(User.id == id)
+            result = await session.execute(query)
+            user = result.scalars().first()
+            user.username = new_username
+            user.email = new_email
+            await session.commit()
+            await session.refresh(user)
+            return user
+
+
+    @staticmethod
+    async def edit_permissions(id: int, new_is_superuser: bool, token_payload: dict) -> UserResponse:
+        validate_admin_permissions(token_payload)
+        async with new_session() as session:
+            query = select(User).where(User.id == id)
+            result = await session.execute(query)
+            user = result.scalars().first()
+            if not user:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
+            if user.is_superuser:
+                validate_owner_permissions(token_payload)
+                user.is_superuser = new_is_superuser
+                await session.commit()
+                await session.refresh(user)
+                return user
+            user.is_superuser = new_is_superuser
+            await session.commit()
+            await session.refresh(user)
+            return user

@@ -10,6 +10,7 @@ class User(Base):
     username = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     is_superuser = Column(BOOLEAN, default=False, nullable=False)
+    is_owner = Column(BOOLEAN, default=False, nullable=False)
     password = Column(Text, nullable=False)
 
 
