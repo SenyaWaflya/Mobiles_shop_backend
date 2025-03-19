@@ -43,3 +43,11 @@ async def delete_product(
         token_payload: dict = Depends(get_auth_user)
 ) -> dict[str, str]:
     return await ProductService.delete(id, token_payload)
+
+
+@router.post('/{id}/favorites', status_code=status.HTTP_201_CREATED, summary='Append To Favorite (authenticated)')
+async def append_to_favorite(
+        id: Annotated[int, Path(description='Id Продукта', ge=1)],
+        token_payload: dict = Depends(get_auth_user)
+) -> ProductResponse:
+    return await ProductService.append_favorite(id, token_payload)

@@ -7,7 +7,8 @@ from src.auth.hashing_password import hash_password, validate_password
 from src.auth import jwt
 from src.auth.jwt import validate_admin_permissions, validate_owner_permissions
 from src.database.database import new_session
-from src.database.models import User
+from src.database.models import User, Product, UserProduct
+from src.schemas.product import ProductResponse
 from src.schemas.user import UserResponse, UserDto
 from src.schemas.token import TokenInfo
 
@@ -140,3 +141,15 @@ class UserService:
             await session.commit()
             await session.refresh(user)
             return user
+
+
+    @staticmethod
+    async def get_favorites(token_payload: dict) -> list[ProductResponse]:
+        id = token_payload.get('sub')
+        async with new_session() as session:
+            query = select(Product).join(UserProduct).where(UserProduct.user_id == id)
+            result = await session.execute(query)
+            products = result.scalars().all()
+            if not products:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Favorite products not found')
+            return [product for product in products]

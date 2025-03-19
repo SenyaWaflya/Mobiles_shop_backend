@@ -1,8 +1,9 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, Path, Form
+from fastapi import APIRouter, Depends, Path, Form, status
 from pydantic import EmailStr
 
 from src.auth.jwt import get_auth_user
+from src.schemas.product import ProductResponse
 from src.schemas.token import TokenInfo
 from src.schemas.user import UserResponse, UserDto
 from src.services.user import UserService
@@ -11,7 +12,7 @@ from src.services.user import UserService
 router = APIRouter(prefix='/users', tags=['Users'])
 
 
-@router.post('/register', summary='Register (all)')
+@router.post('/register', status_code=status.HTTP_201_CREATED, summary='Register (all)')
 async def register(
         username: Annotated[str, Form(description='Имя пользователя', min_length=2, max_length=15, examples=['username'])],
         email: Annotated[EmailStr, Form(description='Почта пользователя', examples=['anymail@gmail.com'])],
@@ -21,7 +22,7 @@ async def register(
     return await UserService.create_user(user)
 
 
-@router.post('/login', summary='Login (all)')
+@router.post('/login', status_code=status.HTTP_201_CREATED, summary='Login (all)')
 async def login(
         email: Annotated[EmailStr, Form(description='Почта пользователя', examples=['anymail@gmail.com'])],
         password: Annotated[str, Form(description='Пароль пользователя', min_length=8, examples=['secretPassword'])]
@@ -32,6 +33,11 @@ async def login(
 @router.get('/me', summary='Get Me (authenticated)')
 async def get_me(token_payload: dict = Depends(get_auth_user)) -> UserResponse:
     return await UserService.get_info_me(token_payload)
+
+
+@router.get('/me/favorites', summary='Get My Favorites (authenticated)')
+async def get_my_favorites(token_payload: dict = Depends(get_auth_user)) -> list[ProductResponse]:
+    return await UserService.get_favorites(token_payload)
 
 
 @router.get('/', summary='Get All Users (authenticated admin)')

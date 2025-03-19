@@ -1,8 +1,9 @@
+from dns.e164 import query
 from fastapi import  HTTPException, status
 from sqlalchemy import select
 
 from src.database.database import new_session
-from src.database.models import Product
+from src.database.models import Product, UserProduct
 from src.schemas.product import ProductDto, ProductResponse
 from src.auth.jwt import validate_admin_permissions
 
@@ -71,3 +72,27 @@ class ProductService:
             await session.commit()
             await session.refresh(product)
             return ProductResponse.model_validate(product)
+
+
+    @staticmethod
+    async def append_favorite(product_id: int, token_payload: dict) -> ProductResponse:
+        id = token_payload.get('sub')
+        async with new_session() as session:
+            product_query = select(Product).where(Product.id == product_id)
+            product_result = await session.execute(product_query)
+            product = product_result.scalars().first()
+            if not product:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Product not found')
+            favorite_exists_query = select(UserProduct).where(UserProduct.user_id == id and UserProduct.product_id == product_id)
+            favorite_exists_result = await session.execute(favorite_exists_query)
+            favorite_exists = favorite_exists_result.scalars().first()
+            if favorite_exists:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Product is already in favorites')
+            favorite = UserProduct(
+                user_id=id,
+                product_id=product_id
+            )
+            session.add(favorite)
+            await session.commit()
+            await session.refresh(product)
+            return product
