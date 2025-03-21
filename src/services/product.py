@@ -1,6 +1,5 @@
-from dns.e164 import query
 from fastapi import  HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, and_
 
 from src.database.database import new_session
 from src.database.models import Product, UserProduct
@@ -26,6 +25,7 @@ class ProductService:
         async with new_session() as session:
             product = Product(
                 title=product_dto.title,
+                price=product_dto.price,
                 quantity=product_dto.quantity
             )
             session.add(product)
@@ -60,7 +60,7 @@ class ProductService:
 
 
     @staticmethod
-    async def edit_quantity_of_product_by_id(id: int, new_quantity: int, token_payload: dict) -> ProductResponse:
+    async def edit_product_by_id(id: int, new_quantity: int, new_price: int, token_payload: dict) -> ProductResponse:
         validate_admin_permissions(token_payload)
         async with new_session() as session:
             query = select(Product).where(Product.id == id)
@@ -69,6 +69,7 @@ class ProductService:
             if not product:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Product not found')
             product.quantity = new_quantity
+            product.price = new_price
             await session.commit()
             await session.refresh(product)
             return ProductResponse.model_validate(product)
@@ -83,7 +84,9 @@ class ProductService:
             product = product_result.scalars().first()
             if not product:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Product not found')
-            favorite_exists_query = select(UserProduct).where(UserProduct.user_id == id and UserProduct.product_id == product_id)
+            favorite_exists_query = (
+                select(UserProduct).where(and_(UserProduct.user_id == id, UserProduct.product_id == product_id))
+            )
             favorite_exists_result = await session.execute(favorite_exists_query)
             favorite_exists = favorite_exists_result.scalars().first()
             if favorite_exists:

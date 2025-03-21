@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Path, Query, Form, Depends
+from fastapi import APIRouter, status, Path, Form, Depends
 from typing import Annotated
 
 from src.auth.jwt import get_auth_user
@@ -21,20 +21,22 @@ async def get_current_product(id: Annotated[int, Path(description='ID проду
 @router.post('/', status_code=status.HTTP_201_CREATED, summary='Create Product (authenticated admin)')
 async def create_product(
         title: Annotated[str, Form(description='Название продукта', min_length=4, max_length=30, examples=['Iphone 16'])],
+        price: Annotated[int, Form(description='Цена продукта', ge=0)],
         quantity: Annotated[int, Form(description='Количество имеющегося продукта', ge=0)],
         token_payload: dict = Depends(get_auth_user)
 ) -> ProductResponse:
-    product = ProductDto(title=title, quantity=quantity)
+    product = ProductDto(title=title, price=price, quantity=quantity)
     return await ProductService.create(product, token_payload)
 
 
-@router.put('/{id}', summary='Edit Quantity Of Product (authenticated admin)')
-async def edit_quantity_of_product(
+@router.put('/{id}', summary='Edit Product (authenticated admin)')
+async def edit_product(
         id: Annotated[int, Path(description='ID продукта', ge=1)],
-        new_quantity: Annotated[int, Query(description='Новое количество продукта', ge=0)],
+        new_quantity: Annotated[int, Form(description='Новое количество продукта', ge=0)],
+        new_price: Annotated[int, Form(description='Цена товара', ge=0)],
         token_payload: dict = Depends(get_auth_user)
 ) -> ProductResponse:
-    return await ProductService.edit_quantity_of_product_by_id(id, new_quantity, token_payload)
+    return await ProductService.edit_product_by_id(id, new_quantity, new_price, token_payload)
 
 
 @router.delete('/{id}', summary='Delete Product (authenticated admin)')
