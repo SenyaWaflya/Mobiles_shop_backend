@@ -1,5 +1,5 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Text, BOOLEAN
-from sqlalchemy.orm import relationship
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 from src.database.database import Base
 
@@ -7,28 +7,28 @@ from src.database.database import Base
 class UserProduct(Base):
     __tablename__ = 'users_product_association'
 
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), nullable=False)
 
 
 class User(Base):
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, nullable=False)
-    email = Column(String, unique=True, nullable=False)
-    is_superuser = Column(BOOLEAN, default=False, nullable=False)
-    is_owner = Column(BOOLEAN, default=False, nullable=False)
-    password = Column(Text, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    username: Mapped[str] = mapped_column(unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(unique=True, nullable=False)
+    is_superuser: Mapped[bool] = mapped_column(default=False, nullable=False)
+    is_owner: Mapped[bool] = mapped_column(default=False, nullable=False)
+    password: Mapped[str] = mapped_column(nullable=False)
 
     products = relationship('Product', secondary='users_product_association', back_populates='users')
 
 class Product(Base):
     __tablename__ = 'products'
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True, nullable=False)
-    quantity = Column(Integer, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    title: Mapped[str] = mapped_column(index=True, nullable=False)
+    quantity: Mapped[int] = mapped_column(nullable=False)
 
     users = relationship('User', secondary='users_product_association', back_populates='products')

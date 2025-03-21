@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from starlette.responses import RedirectResponse
+from fastapi.responses import RedirectResponse
 
 from src.database.database import engine, create_tables
 from src.services.admin import AdminService
