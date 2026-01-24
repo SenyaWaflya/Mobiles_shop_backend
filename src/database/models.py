@@ -28,7 +28,8 @@ class Product(Base):
     __tablename__ = 'products'
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    title: Mapped[str] = mapped_column(index=True, nullable=False)
+    brand: Mapped[str] = mapped_column(index=True, nullable=False)
+    title: Mapped[str] = mapped_column(nullable=False)
     price: Mapped[int] = mapped_column(nullable=False)
     quantity: Mapped[int] = mapped_column(nullable=False)
 

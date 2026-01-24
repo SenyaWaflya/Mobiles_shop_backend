@@ -20,12 +20,13 @@ async def get_current_product(id: Annotated[int, Path(description='ID проду
 
 @router.post('/', status_code=status.HTTP_201_CREATED, summary='Create Product (authenticated admin)')
 async def create_product(
+        brand: Annotated[str, Form(description='Фирма продукта', min_length=2, max_length=15, examples=['Apple'])],
         title: Annotated[str, Form(description='Название продукта', min_length=4, max_length=30, examples=['Iphone 16'])],
         price: Annotated[int, Form(description='Цена продукта', ge=0)],
         quantity: Annotated[int, Form(description='Количество имеющегося продукта', ge=0)],
         token_payload: dict = Depends(get_auth_user)
 ) -> ProductResponse:
-    product = ProductDto(title=title, price=price, quantity=quantity)
+    product = ProductDto(brand=brand, title=title, price=price, quantity=quantity)
     return await ProductService.create(product, token_payload)
 
 

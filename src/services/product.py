@@ -24,6 +24,7 @@ class ProductService:
         validate_admin_permissions(token_payload)
         async with new_session() as session:
             product = Product(
+                brand=product_dto.brand,
                 title=product_dto.title,
                 price=product_dto.price,
                 quantity=product_dto.quantity
