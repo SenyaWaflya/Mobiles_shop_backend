@@ -25,6 +25,11 @@ services:
     build:
       context:
         .
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
     depends_on:
       db:
         condition: service_healthy

@@ -1,0 +1,23 @@
+exclude = [
+    ".git",
+    ".venv",
+    ".idea",
+    ".vscode",
+    ".ruff_cache",
+]
+line-length = 120
+indent-width = 4
+target-version = "py312"
+
+[lint]
+select = ["ALL"]
+ignore = ["D", "S106", "RET504", "INP001", "B904", "COM812", "SIM117", "RUF001"]
+
+[lint.flake8-quotes]
+docstring-quotes = "double"
+inline-quotes = "single"
+
+[format]
+quote-style = "single"
+indent-style = "space"
+line-ending = "auto"

@@ -1,5 +1,5 @@
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship, mapped_column, Mapped
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database.database import Base
 
@@ -23,6 +23,7 @@ class User(Base):
     password: Mapped[str] = mapped_column(nullable=False)
 
     products = relationship('Product', secondary='users_product_association', back_populates='users')
+
 
 class Product(Base):
     __tablename__ = 'products'

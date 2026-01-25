@@ -2,10 +2,12 @@ FROM python:3.13-alpine
 
 WORKDIR /app
 
-COPY requirements.txt .
+RUN pip install uv
 
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml uv.lock ./
+
+RUN uv sync --frozen
 
 COPY . .
 
-CMD ["uvicorn", "--host", "0.0.0.0", "main:app"]
+CMD ["uv", "run", "uvicorn", "--host", "0.0.0.0", "main:app", "--reload"]

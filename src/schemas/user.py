@@ -1,6 +1,6 @@
 from typing import Annotated
-from pydantic import BaseModel, EmailStr
-from pydantic import Field
+
+from pydantic import BaseModel, EmailStr, Field
 
 
 class UserBase(BaseModel):
