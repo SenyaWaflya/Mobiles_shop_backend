@@ -1,37 +1,39 @@
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from datetime import datetime
 
-from src.database.database import Base
+from sqlalchemy import ForeignKey, func
+from sqlalchemy.ext.asyncio import AsyncAttrs
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
-class UserProduct(Base):
+class BaseModel(AsyncAttrs, DeclarativeBase):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(nullable=False, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(nullable=False, server_default=func.now(), server_onupdate=func.now())
+
+
+class UserProductModel(BaseModel):
     __tablename__ = 'users_product_association'
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
     product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), nullable=False)
 
 
-class User(Base):
+class UserModel(BaseModel):
     __tablename__ = 'users'
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    tg_id: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
     username: Mapped[str] = mapped_column(unique=True, nullable=False)
-    email: Mapped[str] = mapped_column(unique=True, nullable=False)
-    is_superuser: Mapped[bool] = mapped_column(default=False, nullable=False)
-    is_owner: Mapped[bool] = mapped_column(default=False, nullable=False)
-    password: Mapped[str] = mapped_column(nullable=False)
+    email: Mapped[str] = mapped_column(unique=True)
 
-    products = relationship('Product', secondary='users_product_association', back_populates='users')
+    products = relationship('ProductModel', secondary='users_product_association', back_populates='users')
 
 
-class Product(Base):
+class ProductModel(BaseModel):
     __tablename__ = 'products'
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
     brand: Mapped[str] = mapped_column(index=True, nullable=False)
     title: Mapped[str] = mapped_column(nullable=False)
     price: Mapped[int] = mapped_column(nullable=False)
     quantity: Mapped[int] = mapped_column(nullable=False)
 
-    users = relationship('User', secondary='users_product_association', back_populates='products')
+    users = relationship('UserModel', secondary='users_product_association', back_populates='products')
