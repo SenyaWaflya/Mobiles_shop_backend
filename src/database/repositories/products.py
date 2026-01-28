@@ -70,3 +70,11 @@ class ProductsRepository:
             await session.delete(product)
             await session.commit()
             return ProductResponse.model_validate(product)
+
+    @staticmethod
+    async def get_brands() -> list[str]:
+        async with async_session() as session:
+            query = select(ProductModel.brand).distinct()
+            result = await session.execute(query)
+            brands = result.scalars().all()
+            return brands

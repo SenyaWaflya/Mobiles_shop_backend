@@ -42,3 +42,10 @@ class ProductsService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Product not found')
         product = await ProductsRepository.delete(product_id)
         return product
+
+    @staticmethod
+    async def get_brands() -> list[str]:
+        brands = await ProductsRepository.get_brands()
+        if not brands:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Brands not found')
+        return brands

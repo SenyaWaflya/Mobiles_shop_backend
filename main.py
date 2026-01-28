@@ -5,8 +5,8 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
 from src.database.connection import create_tables, engine
-from src.routers.products import router as products_router
-from src.routers.users import router as users_router
+from src.routers.products import products_router
+from src.routers.users import users_router
 
 swagger_ui_parameters = {'tryItOutEnabled': True, 'syntaxHighlight': {'activate': True, 'theme': 'nord'}}
 
