@@ -1,9 +1,13 @@
 services:
   db:
+    networks:
+      - shop_net
     container_name:
       shop_postgres
     image:
       postgres:17-alpine
+    env_file:
+      - .env
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_DB: ${DB_NAME}
@@ -17,6 +21,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
   shop_backend:
+    networks:
+      - shop_net
     container_name:
       shop_backend
     image: shop_backend
@@ -25,6 +31,8 @@ services:
     build:
       context:
         .
+    env_file:
+      - .env
     develop:
       watch:
         - action: sync
@@ -35,3 +43,6 @@ services:
         condition: service_healthy
 volumes:
   postgres_data:
+networks:
+  shop_net:
+    external: true
