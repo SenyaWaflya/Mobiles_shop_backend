@@ -35,5 +35,6 @@ class ProductModel(BaseModel):
     title: Mapped[str] = mapped_column(nullable=False)
     price: Mapped[int] = mapped_column(nullable=False)
     quantity: Mapped[int] = mapped_column(nullable=False)
+    image_path: Mapped[str] = mapped_column(unique=True)
 
     users = relationship('UserModel', secondary='users_product_association', back_populates='products')

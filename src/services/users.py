@@ -13,19 +13,19 @@ class UsersService:
         exists_email = await UsersRepository.check_exists_email(user_dto.email)
         if exists_email:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Email already exists')
-        result = await UsersRepository.add(user_dto)
-        return result
+        user_model = await UsersRepository.add(user_dto)
+        return UserResponse.model_validate(user_model)
 
     @staticmethod
     async def get_user(tg_id: str) -> UserResponse:
-        user = await UsersRepository.get(tg_id)
-        if not user:
+        user_model = await UsersRepository.get(tg_id)
+        if not user_model:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
-        return user
+        return UserResponse.model_validate(user_model)
 
     @staticmethod
     async def get_users() -> list[UserResponse]:
-        users = await UsersRepository.get_all()
-        if not users:
+        users_models = await UsersRepository.get_all()
+        if not users_models:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No users found')
-        return users
+        return [UserResponse.model_validate(user_model) for user_model in users_models]

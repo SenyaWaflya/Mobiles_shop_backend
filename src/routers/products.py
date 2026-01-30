@@ -14,8 +14,11 @@ async def create_product(
     title: Annotated[str, Form(description='Название продукта', min_length=4, max_length=30, examples=['Iphone 16'])],
     price: Annotated[int, Form(description='Цена продукта', ge=0)],
     quantity: Annotated[int, Form(description='Количество имеющегося продукта', ge=0)],
+    image_path: Annotated[
+        str | None, Form(description='Путь до файла в s3', examples=['1/1/1ae7367d-6cf2-41ca-9599-9409291adc6e.png'])
+    ],
 ) -> ProductResponse:
-    product = ProductDto(brand=brand, title=title, price=price, quantity=quantity)
+    product = ProductDto(brand=brand, title=title, price=price, quantity=quantity, image_path=image_path)
     return await ProductsService.create(product)
 
 
@@ -39,8 +42,11 @@ async def edit_product(
     product_id: Annotated[int, Path(description='ID продукта', ge=1)],
     new_quantity: Annotated[int, Form(description='Новое количество продукта', ge=0)],
     new_price: Annotated[int, Form(description='Цена товара', ge=0)],
+    new_image_path: Annotated[
+        str | None, Form(description='Путь до файла в s3', examples=['1/1/1ae7367d-6cf2-41ca-9599-9409291adc6e.png'])
+    ],
 ) -> ProductResponse:
-    return await ProductsService.edit(product_id, new_quantity, new_price)
+    return await ProductsService.edit(product_id, new_quantity, new_price, new_image_path=new_image_path)
 
 
 @products_router.delete('/{product_id}', summary='Delete Product')

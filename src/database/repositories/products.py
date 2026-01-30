@@ -2,7 +2,7 @@ from sqlalchemy.sql import exists, select
 
 from src.database.connection import async_session
 from src.database.models import ProductModel
-from src.schemas.products import ProductDto, ProductResponse
+from src.schemas.products import ProductDto
 
 
 class ProductsRepository:
@@ -23,53 +23,58 @@ class ProductsRepository:
             return exists_product
 
     @staticmethod
-    async def add(product_dto: ProductDto) -> ProductResponse:
+    async def add(product_dto: ProductDto) -> ProductModel:
         async with async_session() as session:
-            product = ProductModel(
-                brand=product_dto.brand, title=product_dto.title, price=product_dto.price, quantity=product_dto.quantity
+            product_model = ProductModel(
+                brand=product_dto.brand,
+                title=product_dto.title,
+                price=product_dto.price,
+                quantity=product_dto.quantity,
+                image_path=product_dto.image_path,
             )
-            session.add(product)
+            session.add(product_model)
             await session.commit()
-            await session.refresh(product)
-            return ProductResponse.model_validate(product)
+            await session.refresh(product_model)
+            return product_model
 
     @staticmethod
-    async def get(product_id: int) -> ProductResponse:
+    async def get(product_id: int) -> ProductModel:
         async with async_session() as session:
             query = select(ProductModel).where(ProductModel.id == product_id)
             result = await session.execute(query)
-            product = result.scalars().first()
-            return ProductResponse.model_validate(product)
+            product_model = result.scalars().first()
+            return product_model
 
     @staticmethod
-    async def get_all() -> list[ProductResponse]:
+    async def get_all() -> list[ProductModel]:
         async with async_session() as session:
             query = select(ProductModel)
             result = await session.execute(query)
-            products = result.scalars().all()
-            return [ProductResponse.model_validate(product) for product in products]
+            products_models = result.scalars().all()
+            return products_models
 
     @staticmethod
-    async def edit(product_id: int, new_quantity: int, new_price: int) -> ProductResponse:
+    async def edit(product_id: int, new_quantity: int, new_price: int, new_image_path: str) -> ProductModel:
         async with async_session() as session:
             query = select(ProductModel).where(ProductModel.id == product_id)
             result = await session.execute(query)
-            product = result.scalars().first()
-            product.quantity = new_quantity
-            product.price = new_price
+            product_model = result.scalars().first()
+            product_model.quantity = new_quantity
+            product_model.price = new_price
+            product_model.image_path = new_image_path
             await session.commit()
-            await session.refresh(product)
-            return ProductResponse.model_validate(product)
+            await session.refresh(product_model)
+            return product_model
 
     @staticmethod
-    async def delete(product_id: int) -> ProductResponse:
+    async def delete(product_id: int) -> ProductModel:
         async with async_session() as session:
             query = select(ProductModel).where(ProductModel.id == product_id)
             result = await session.execute(query)
-            product = result.scalars().first()
-            await session.delete(product)
+            product_model = result.scalars().first()
+            await session.delete(product_model)
             await session.commit()
-            return ProductResponse.model_validate(product)
+            return product_model
 
     @staticmethod
     async def get_brands() -> list[str]:

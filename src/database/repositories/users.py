@@ -3,7 +3,7 @@ from sqlalchemy.sql import exists, select
 
 from src.database.connection import async_session
 from src.database.models import UserModel
-from src.schemas.users import UserDto, UserResponse
+from src.schemas.users import UserDto
 
 
 class UsersRepository:
@@ -24,26 +24,26 @@ class UsersRepository:
             return email_exists
 
     @staticmethod
-    async def add(user_dto: UserDto) -> UserResponse:
+    async def add(user_dto: UserDto) -> UserModel:
         async with async_session() as session:
-            user = UserModel(tg_id=user_dto.tg_id, username=user_dto.username, email=user_dto.email)
-            session.add(user)
+            user_model = UserModel(tg_id=user_dto.tg_id, username=user_dto.username, email=user_dto.email)
+            session.add(user_model)
             await session.commit()
-            await session.refresh(user)
-            return UserResponse.model_validate(user)
+            await session.refresh(user_model)
+            return user_model
 
     @staticmethod
-    async def get(tg_id: str) -> UserResponse:
+    async def get(tg_id: str) -> UserModel:
         async with async_session() as session:
             query = select(UserModel).where(UserModel.tg_id == tg_id)
             result = await session.execute(query)
             user_model = result.scalars().first()
-            return UserResponse.model_validate(user_model)
+            return user_model
 
     @staticmethod
-    async def get_all() -> list[UserResponse]:
+    async def get_all() -> list[UserModel]:
         async with async_session() as session:
             query = select(UserModel)
             result = await session.execute(query)
             users_models = result.scalars().all()
-            return [UserResponse.model_validate(user) for user in users_models]
+            return users_models
