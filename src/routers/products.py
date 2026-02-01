@@ -9,16 +9,7 @@ products_router = APIRouter(prefix='/products', tags=['Products'])
 
 
 @products_router.post('/', status_code=status.HTTP_201_CREATED, summary='Create Product')
-async def create_product(
-    brand: Annotated[str, Form(description='Фирма продукта', min_length=2, max_length=15, examples=['Apple'])],
-    title: Annotated[str, Form(description='Название продукта', min_length=4, max_length=30, examples=['Iphone 16'])],
-    price: Annotated[int, Form(description='Цена продукта', ge=0)],
-    quantity: Annotated[int, Form(description='Количество имеющегося продукта', ge=0)],
-    image_path: Annotated[
-        str | None, Form(description='Путь до файла в s3', examples=['1/1/1ae7367d-6cf2-41ca-9599-9409291adc6e.png'])
-    ],
-) -> ProductResponse:
-    product = ProductDto(brand=brand, title=title, price=price, quantity=quantity, image_path=image_path)
+async def create_product(product: ProductDto) -> ProductResponse:
     return await ProductsService.create(product)
 
 
